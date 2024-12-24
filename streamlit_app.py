@@ -10,6 +10,7 @@ import hashlib
 import uuid
 import requests
 from streamlit_option_menu import option_menu
+import pdfplumber
 
 MS_TEAMS_WEBHOOK_URL = "https://erfxxam.webhook.office.com/webhookb2/4855e595-4013-44b5-97a5-d815430d7e4b@f29c254b-53da-4110-abde-498f85d6ebaf/IncomingWebhook/9800667b5556458bb99e136cda97b4c2/861054b1-b771-4ed9-8a56-b0a0c223585b/V2Ag2a04pEno54Oj5C4uo2HM5ICZ4WAfNkKi1kc_u6vYs1"
 
@@ -68,22 +69,14 @@ def main():
          elif menu_selection == "Chat":
               chat_widget()
     else:
-          with st.sidebar:
-                menu_selection = option_menu("Chọn chức năng", 
-                    ["Đăng nhập", "Đăng ký", "Xem tài liệu chia sẻ"],
-                     icons=['box-arrow-in-right', 'person-plus', 'share-fill'],
-                    menu_icon="cast", default_index=0,
-                    styles={
-                        "container": {"padding": "0!important", "background-color": "#fafafa"},
-                        "icon": {"color": "orange", "font-size": "25px"}, 
-                        "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
-                        "nav-link-selected": {"background-color": "gray"},
-                    },
-                 )
-          if menu_selection == "Đăng nhập":
-              login_page()
-          elif menu_selection == "Đăng ký":
-              register_page()
+         menu_selection = st.sidebar.radio("Chọn Chức Năng",
+                                    ["Đăng nhập", "Đăng ký", "Xem tài liệu chia sẻ"])
+         if menu_selection == "Đăng nhập":
+             login_page()
+         elif menu_selection == "Đăng ký":
+             register_page()
+         elif menu_selection == "Xem tài liệu chia sẻ":
+              share_page()
 def login_page():
     st.title("Đăng nhập")
     with st.form(key="login_form"):
@@ -218,7 +211,6 @@ def list_documents_page():
     st.header("Danh Sách Hồ Sơ")
 
     col1, col2, col3 = st.columns([2, 2, 1])
-    
     with col1:
         search_term = st.text_input("Tìm kiếm theo tên", placeholder="Nhập từ khóa", key="search_term")
         search_code = st.text_input("Tìm kiếm theo mã", placeholder="Nhập mã", key="search_code")
@@ -303,32 +295,35 @@ def list_documents_page():
                             if book[5] and os.path.exists(book[5]):
                                 
                                 if st.button(f"Xem trước #{book[0]}", key=f"preview_{book[0]}"):
-                                    with st.container():
-                                        file_extension = os.path.splitext(book[5])[1].lower()
-                                        if file_extension == '.pdf':
-                                            try:
-                                                 with open(book[5], "rb") as f:
+                                    with st.form(key=f"preview_form_{book[0]}"):
+                                      if st.form_submit_button("Xem trước"):
+                                          with st.container():
+                                            file_extension = os.path.splitext(book[5])[1].lower()
+                                            st.write(f"file extenstion: {file_extension}")
+                                            if file_extension == '.pdf':
+                                                try:
+                                                    with open(book[5], "rb") as f:
                                                         pdf_data = f.read()
                                                         base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
-                                                        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+                                                        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf" sandbox></iframe>'
                                                         st.markdown(pdf_display, unsafe_allow_html=True)
-                                            except Exception as e:
-                                                st.error(f"Lỗi khi xem trước PDF: {e}")
-                                        elif file_extension in ['.jpg', '.jpeg', '.png']:
-                                             try:
-                                                 image = Image.open(book[5])
-                                                 st.image(image)
-                                             except Exception as e:
-                                                 st.error(f"Lỗi khi xem trước ảnh: {e}")
-                                        elif file_extension in ['.txt']:
-                                            try:
-                                                with open(book[5], "r", encoding="utf-8") as file:
-                                                    content = file.read()
-                                                    st.code(content, language='text')
-                                            except Exception as e:
-                                                 st.error(f"Lỗi khi xem trước text: {e}")
-                                        else:
-                                            st.warning("Không hỗ trợ xem trước loại file này.")
+                                                except Exception as e:
+                                                    st.error(f"Lỗi khi xem trước PDF: {e}")
+                                            elif file_extension in ['.jpg', '.jpeg', '.png']:
+                                                 try:
+                                                     image = Image.open(book[5])
+                                                     st.image(image)
+                                                 except Exception as e:
+                                                     st.error(f"Lỗi khi xem trước ảnh: {e}")
+                                            elif file_extension in ['.txt']:
+                                                try:
+                                                    with open(book[5], "r", encoding="utf-8") as file:
+                                                        content = file.read()
+                                                        st.code(content, language='text')
+                                                except Exception as e:
+                                                     st.error(f"Lỗi khi xem trước text: {e}")
+                                            else:
+                                                st.warning("Không hỗ trợ xem trước loại file này.")
                             if book[5] and os.path.exists(book[5]):
                                  with open(book[5], "rb") as file:
                                     st.download_button(
