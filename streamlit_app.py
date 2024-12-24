@@ -10,7 +10,6 @@ import hashlib
 import uuid
 import requests
 from streamlit_option_menu import option_menu
-import pdfplumber
 
 MS_TEAMS_WEBHOOK_URL = "https://erfxxam.webhook.office.com/webhookb2/4855e595-4013-44b5-97a5-d815430d7e4b@f29c254b-53da-4110-abde-498f85d6ebaf/IncomingWebhook/9800667b5556458bb99e136cda97b4c2/861054b1-b771-4ed9-8a56-b0a0c223585b/V2Ag2a04pEno54Oj5C4uo2HM5ICZ4WAfNkKi1kc_u6vYs1"
 
@@ -57,7 +56,7 @@ def main():
                  )
          if menu_selection == "Đăng xuất":
              del st.session_state.user
-             st.experimental_rerun()
+             st.rerun()
          elif menu_selection == "Thêm Hồ Sơ":
              add_document_page()
          elif menu_selection == "Danh Sách Hồ Sơ":
@@ -70,7 +69,7 @@ def main():
               chat_widget()
     else:
          with st.sidebar:
-             menu_selection = option_menu("Chọn Chức Năng",
+               menu_selection = option_menu("Chọn Chức Năng",
                                     ["Đăng nhập", "Đăng ký"])
          if menu_selection == "Đăng nhập":
              login_page()
@@ -88,7 +87,7 @@ def login_page():
             if user:
                 st.session_state.user = user
                 st.success("Đăng nhập thành công")
-                st.experimental_rerun()
+                st.rerun()
             else:
                  st.error("Tên đăng nhập hoặc mật khẩu không đúng")
 def register_page():
@@ -122,7 +121,7 @@ def change_password_page():
                         if dc.updateUserPassword(st.session_state.user[0], new_password):
                             st.success("Đổi mật khẩu thành công, vui lòng đăng nhập lại")
                             del st.session_state.user
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error("Lỗi khi đổi mật khẩu")
                      else:
@@ -145,7 +144,7 @@ def user_management_page():
                     if st.button("Cập nhật quyền", key=f"update_role_{user[0]}"):
                         if dc.updateUserRole(user[0], new_role):
                             st.success("Cập nhật quyền thành công")
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error("Lỗi khi cập nhật quyền")
                 with col2:
@@ -169,7 +168,7 @@ def user_management_page():
                         if dc.deleteUser(user[0]):
                             st.success(f"Xóa người dùng {user[1]} thành công")
                             send_teams_notification(f"User {user[1]} đã bị xóa.")
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error(f"Lỗi khi xóa người dùng {user[1]}")
     else:
@@ -210,6 +209,7 @@ def list_documents_page():
     st.header("Danh Sách Hồ Sơ")
 
     col1, col2, col3 = st.columns([2, 2, 1])
+    
     with col1:
         search_term = st.text_input("Tìm kiếm theo tên", placeholder="Nhập từ khóa", key="search_term")
         search_code = st.text_input("Tìm kiếm theo mã", placeholder="Nhập mã", key="search_code")
@@ -235,7 +235,7 @@ def list_documents_page():
                 filter_date_to = None
             )
             
-            st.experimental_rerun()
+            st.rerun()
 
     if "filter_applied" not in st.session_state:
           st.session_state.filter_applied = False
@@ -290,39 +290,44 @@ def list_documents_page():
                                 with action_col2:
                                     if st.button(f"Xóa #{book[0]}", key=f"delete_{book[0]}"):
                                         dc.deleteBook(book[0])
-                                        st.experimental_rerun()
+                                        st.rerun()
                             if book[5] and os.path.exists(book[5]):
                                 
                                 if st.button(f"Xem trước #{book[0]}", key=f"preview_{book[0]}"):
-                                    with st.form(key=f"preview_form_{book[0]}"):
-                                      if st.form_submit_button("Xem trước"):
+                                    with st.form(key = f"preview_form_{book[0]}"):
+                                        if st.form_submit_button("Xem trước"):
                                           with st.container():
-                                            file_extension = os.path.splitext(book[5])[1].lower()
-                                            st.write(f"file extenstion: {file_extension}")
-                                            if file_extension == '.pdf':
-                                                try:
-                                                    with open(book[5], "rb") as f:
-                                                        pdf_data = f.read()
-                                                        base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
-                                                        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf" sandbox></iframe>'
-                                                        st.markdown(pdf_display, unsafe_allow_html=True)
-                                                except Exception as e:
+                                              file_extension = os.path.splitext(book[5])[1].lower()
+                                              st.write(f"file extenstion: {file_extension}")
+                                              if file_extension == '.pdf':
+                                                  try:
+                                                      with open(book[5], "rb") as f:
+                                                          pdf_data = f.read()
+                                                          base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+                                                          pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf" sandbox></iframe>'
+                                                          st.markdown(pdf_display, unsafe_allow_html=True)
+                                                
+                                                  except Exception as e:
                                                     st.error(f"Lỗi khi xem trước PDF: {e}")
-                                            elif file_extension in ['.jpg', '.jpeg', '.png']:
-                                                 try:
-                                                     image = Image.open(book[5])
-                                                     st.image(image)
-                                                 except Exception as e:
-                                                     st.error(f"Lỗi khi xem trước ảnh: {e}")
-                                            elif file_extension in ['.txt']:
-                                                try:
-                                                    with open(book[5], "r", encoding="utf-8") as file:
-                                                        content = file.read()
-                                                        st.code(content, language='text')
-                                                except Exception as e:
-                                                     st.error(f"Lỗi khi xem trước text: {e}")
-                                            else:
-                                                st.warning("Không hỗ trợ xem trước loại file này.")
+                                                    st.write(f"Lỗi : {e}")
+                                                    
+                                              elif file_extension in ['.jpg', '.jpeg', '.png']:
+                                                   try:
+                                                       image = Image.open(book[5])
+                                                       st.image(image)
+                                                   except Exception as e:
+                                                       st.error(f"Lỗi khi xem trước ảnh: {e}")
+                                                       st.write(f"Lỗi : {e}")
+                                              elif file_extension in ['.txt']:
+                                                  try:
+                                                      with open(book[5], "r", encoding="utf-8") as file:
+                                                          content = file.read()
+                                                          st.code(content, language='text')
+                                                  except Exception as e:
+                                                       st.error(f"Lỗi khi xem trước text: {e}")
+                                                       st.write(f"Lỗi : {e}")
+                                              else:
+                                                  st.warning("Không hỗ trợ xem trước loại file này.")
                             if book[5] and os.path.exists(book[5]):
                                  with open(book[5], "rb") as file:
                                     st.download_button(
