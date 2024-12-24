@@ -69,14 +69,13 @@ def main():
          elif menu_selection == "Chat":
               chat_widget()
     else:
-         menu_selection = st.sidebar.radio("Chọn Chức Năng",
-                                    ["Đăng nhập", "Đăng ký", "Xem tài liệu chia sẻ"])
+         with st.sidebar:
+             menu_selection = option_menu("Chọn Chức Năng",
+                                    ["Đăng nhập", "Đăng ký"])
          if menu_selection == "Đăng nhập":
              login_page()
          elif menu_selection == "Đăng ký":
              register_page()
-         elif menu_selection == "Xem tài liệu chia sẻ":
-              share_page()
 def login_page():
     st.title("Đăng nhập")
     with st.form(key="login_form"):
