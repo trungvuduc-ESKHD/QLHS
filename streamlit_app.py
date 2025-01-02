@@ -11,7 +11,7 @@ import uuid
 import requests
 from streamlit_option_menu import option_menu
 
-MS_TEAMS_WEBHOOK_URL = "https://erfxxam.webhook.office.com/webhookb2/4855e595-4013-44b5-97a5-d815430d7e4b@f29c254b-53da-4110-abde-498f85d6ebaf/IncomingWebhook/9800667b5556458bb99e136cda97b4c2/861054b1-b771-4ed9-8a56-b0a0c223585b/V2Ag2a04pEno54Oj5C4uo2HM5ICZ4WAfNkKi1kc_u6vYs1"
+MS_TEAMS_WEBHOOK_URL = ""
 
 if "edit_key" not in st.session_state:
     st.session_state.edit_key = None
