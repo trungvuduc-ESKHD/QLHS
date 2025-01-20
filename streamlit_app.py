@@ -184,7 +184,7 @@ def add_document_page():
           with col2:
               doc_code = st.text_input("Mã tài liệu", placeholder="Nhập mã tài liệu")
               doc_category = st.selectbox("Loại tài liệu",
-                                          ["01-Hồ Sơ Pháp Lý", "02-Hồ Sơ Dự Án", "03-Hồ Sơ Nội Bộ", "04-Hợp Đồng"])
+                                          ["01-Hồ Sơ An Toàn", "02-Hồ Sơ PCCC", "03-Hồ Sơ Môi Trường", "04-Công Văn Môi Trường", "05-Hồ Sơ Công Trình", "06-Hồ Sơ Chung"])
           uploaded_file = st.file_uploader("Tải file đính kèm",
                                            type=['pdf', 'docx', 'txt', 'xlsx', 'jpg', 'png'])
           doc_date = st.date_input("Ngày ban hành",key = "doc_date")
@@ -216,7 +216,7 @@ def list_documents_page():
         search_unit = st.text_input("Tìm kiếm theo đơn vị", placeholder="Nhập đơn vị", key="search_unit")
     with col2:
         
-        filter_category = st.selectbox("Lọc theo loại", ["All", "01-Hồ Sơ Pháp Lý", "02-Hồ Sơ Dự Án", "03-Hồ Sơ Nội Bộ", "04-Hợp Đồng"], key="filter_category")
+        filter_category = st.selectbox("Lọc theo loại", ["All", "01-Hồ Sơ An Toàn", "02-Hồ Sơ PCCC", "03-Hồ Sơ Môi Trường", "04-Công Văn Môi Trường", "05-Hồ Sơ Công Trình", "06-Hồ Sơ Chung"], key="filter_category")
         filter_date_from = st.date_input("Lọc theo ngày tạo từ",key="filter_date_from")
         filter_date_to = st.date_input("Lọc theo ngày tạo đến", key="filter_date_to")
 
@@ -360,8 +360,8 @@ def edit_document(book):
                 st.session_state.edit_data["doc_code"] = st.text_input("Mã tài liệu", value=st.session_state.edit_data["doc_code"])
                 st.session_state.edit_data["doc_category"] = st.selectbox(
                     "Loại tài liệu",
-                    ["01-Hồ Sơ Pháp Lý", "02-Hồ Sơ Dự Án", "03-Hồ Sơ Nội Bộ", "04-Hợp Đồng"],
-                    index=["01-Hồ Sơ Pháp Lý", "02-Hồ Sơ Dự Án", "03-Hồ Sơ Nội Bộ", "04-Hợp Đồng"].index(st.session_state.edit_data["doc_category"])
+                    ["01-Hồ Sơ An Toàn", "02-Hồ Sơ PCCC", "03-Hồ Sơ Môi Trường", "04-Công Văn Môi Trường", "05-Hồ Sơ Công Trình", "06-Hồ Sơ Chung"],
+                    index=["01-Hồ Sơ An Toàn", "02-Hồ Sơ PCCC", "03-Hồ Sơ Môi Trường", "04-Công Văn Môi Trường", "05-Hồ Sơ Công Trình", "06-Hồ Sơ Chung"].index(st.session_state.edit_data["doc_category"])
                 )
                 if st.session_state.user[3] == 'admin':
                     uploaded_file = st.file_uploader("Tải file đính kèm mới", type=['pdf', 'docx', 'txt', 'xlsx', 'jpg', 'png'])
